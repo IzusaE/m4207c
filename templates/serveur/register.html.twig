@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Inscription{% endblock %}
 
 {% block body %}
 <style>
@@ -16,7 +16,7 @@ h1 {font-family: 'Potta One', cursive; text-align: center;}
 p {font-family: 'Calibri', serif; text-align: center; font-size: 12px; color: grey; opacity : 0.9; margin-top: -15px;}
 
 #frame {
-  height: 300px;
+  height: 405px;
   width: 430px;
   background:
     linear-gradient(
@@ -32,6 +32,10 @@ p {font-family: 'Calibri', serif; text-align: center; font-size: 12px; color: gr
   overflow: hidden;
   transition: all .5s ease;
   margin-top: 40px;
+}
+
+fieldset{
+    border: none;
 }
 
 #form-signin {
@@ -113,10 +117,6 @@ label {
   color: black; /* La couleur du texte */
   margin-left: 100px;
 }
-a {
-  text-decoration: none !important;
-  color: darkblue;
-}
 </style>
 
 <div class="example-wrapper">
@@ -124,13 +124,18 @@ a {
     <p>Bonjour et Bienvenue sur la page de connexion de notre site.<br /> Merci de bien vouloir saisir votre login et votre mot de passe dans les endroits dédiés.</p>
     <div id="conteneur_formulaire">
         <div id="frame">
-            <form id="form-signin" action="verification.php" method="POST">
-                <label for="login">Identifiant :</label>
-                <input class="form-styling" type="text" name="login" id="user_login" required>
-                <label for="passwd">Mot de Passe :</label>
-                <input class="form-styling" type="password" name="passwd" id="passwd" required>
-                <br /><input class="typee" type="submit" id='submit' value='LOGIN' >
-                <br /><label for="login">Vous n'êtes pas inscris ? <a href="/register">Inscription</a></label>
+            <form method="post" action="/createUser">
+                <fieldset>
+                    <label for="nom">Identifiant :</label>
+                    <input class="form-styling" type="text" name="nom" id="nom" placeholder="Entrez un Nom">
+                    <label for="prenom">Prenom</label>
+                    <input class="form-styling" type="text" name="prenom" id="prenom" placeholder="Entrez un Prénom">
+                    <label for="email">Email</label>
+                    <input type="text" name="email" class="form-styling" id="email"  placeholder="Entrez un Email">
+                    <label for="nomCivilite">Password</label>
+                    <input type="text" name="password" class="form-styling" id="password" aria-describedby="emailHelp" placeholder="Entrez un mot de passe">
+                    <button type="submit" class="typee">Envoyer</button>
+                </fieldset>
             </form>
         </div>  
     </div>
