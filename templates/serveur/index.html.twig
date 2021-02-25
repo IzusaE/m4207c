@@ -124,11 +124,11 @@ a {
     <p>Bonjour et Bienvenue sur la page de connexion de notre site.<br /> Merci de bien vouloir saisir votre login et votre mot de passe dans les endroits dédiés.</p>
     <div id="conteneur_formulaire">
         <div id="frame">
-            <form id="form-signin" action="verification.php" method="POST">
+            <form id="form-signin" method="post" action="/loginUser">
                 <label for="login">Identifiant :</label>
-                <input class="form-styling" type="text" name="login" id="user_login" required>
+                <input class="form-styling" type="text" name="nom" id="nom" required>
                 <label for="passwd">Mot de Passe :</label>
-                <input class="form-styling" type="password" name="passwd" id="passwd" required>
+                <input class="form-styling" type="password" name="password" id="password" required>
                 <br /><input class="typee" type="submit" id='submit' value='LOGIN' >
                 <br /><label for="login">Vous n'êtes pas inscris ? <a href="/register">Inscription</a></label>
             </form>

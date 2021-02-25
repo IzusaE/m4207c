@@ -21,6 +21,16 @@ class ServeurController extends AbstractController
             'controller_name' => 'ServeurController',
         ]);
     }
+
+    /**
+     * @Route("/coco", name="coco")
+     */
+    public function coco()
+    {
+        return $this->render('serveur/coco.html.twig', [
+            'controller_name' => 'ServeurController',
+        ]);
+    }
     
     /**
     * @Route("/register", name="register")
@@ -54,4 +64,24 @@ class ServeurController extends AbstractController
 		$manager->flush();
 		return $this->redirectToRoute('serveur');
 	}
+
+    /**
+     * @Route("/loginUser", name="login_user")
+     */
+    public function loginUser(EntityManagerInterface $manager, Request $request)
+    {
+        $AllUsers = $manager->getRepository(User::class)->findAll();
+		$recupNom = $request->request->get("nom");
+        $recupPassword = $request->request->get("password");
+        $user1 = $manager->getRepository(User::class)->
+        findBy( 
+            array ('prenom' => $recupNom, 'password' => $recupPassword) 
+        );
+        if ($user1 != NULL) {
+            return $this->redirectToRoute('coco');
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+	}
+    
 }
