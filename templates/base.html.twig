@@ -3,11 +3,55 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
+        {% block stylesheets %}
+          <link href="https://bootswatch.com/4/journal/bootstrap.min.css" rel="stylesheet" />
+          <link href="https://bootswatch.com/4/journal/bootstrap.css" rel="stylesheet" />
+        {% endblock %}
 
-        {% block javascripts %}{% endblock %}
+        {% block javascripts %}
+          <script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
+        {% endblock %}
     </head>
     <body>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/serveur">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/register">Créer un Utilisateur</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/listeUser">Liste Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/registerGenre">Créer un Genre</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/listGenre">Liste Genres</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Utilisateurs</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/register">Créer</a>
+                <a class="dropdown-item" href="#">Liste</a>
+              </div>
+            </li>
+          </ul>
+          <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search">
+            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+          </form>
+        </div>
+      </nav>
         {% block body %}{% endblock %}
     </body>
 </html>
