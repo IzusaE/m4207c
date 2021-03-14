@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}liste Genre{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    h1 {}
+</style>
+
+<br />
+<center><h2>Liste des Genres Enregistrés :</h2></center>
+<br />
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Nom</th>
+	   <th scope="col">Suppression</th>
+    </tr>
+  </thead>
+  <tbody>
+	{% for item in listeGenre %}
+    <tr class="table-active">
+      <th scope="row">{{ item.id }}</th>
+      <td>{{ item.type }}</td>
+      <td><a href="{{ path('genre_delete', {'id':item.id}) }}">Supprimer</a></p></td>
+    </tr>
+	{% endfor %}
+  </tbody>
+  <!-- fin affichage d'une liste -->
+  
+</table>
+<script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
+
+{% endblock %}

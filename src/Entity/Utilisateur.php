@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
  */
-class User
+class Utilisateur
 {
     /**
      * @ORM\Id
@@ -18,9 +18,14 @@ class User
     private $id;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $groupe_id_id;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -28,7 +33,17 @@ class User
     private $prenom;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=255)
+     */
+    private $code;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $salt;
+
+    /**
+     * @ORM\Column(type="string", length=255)
      */
     private $email;
 
@@ -42,14 +57,26 @@ class User
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getGroupeIdId(): ?int
     {
-        return $this->name;
+        return $this->groupe_id_id;
     }
 
-    public function setName(string $name): self
+    public function setGroupeIdId(int $groupe_id_id): self
     {
-        $this->name = $name;
+        $this->groupe_id_id = $groupe_id_id;
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): self
+    {
+        $this->nom = $nom;
 
         return $this;
     }
@@ -62,6 +89,30 @@ class User
     public function setPrenom(string $prenom): self
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
+    public function getSalt(): ?string
+    {
+        return $this->salt;
+    }
+
+    public function setSalt(string $salt): self
+    {
+        $this->salt = $salt;
 
         return $this;
     }
