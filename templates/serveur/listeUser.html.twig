@@ -19,7 +19,7 @@
       <th scope="col">Nom</th>
       <th scope="col">Prénom</th>
 	   <th scope="col">email</th>     
-	   <th scope="col">Password</th>     
+	   <th scope="col">Suppression</th>     
     </tr>
   </thead>
   <tbody>
@@ -28,7 +28,7 @@
       <th scope="row">{{ item.nom }}</th>
       <td>{{ item.prenom }}</td>
       <td>{{ item.email }}</td>
-      <td><a href="{{ path('utilisateur_delete', {'id':item.id}) }}">Supprimer</a></p></td>
+      <td><a href="{{ path('utilisateur_delete', {'id':item.id}) }}"><button type="button" class="btn btn-primary">Supprimer</button></a></p></td>
     </tr>
 	{% endfor %}
   </tbody>

@@ -26,7 +26,7 @@
     <tr class="table-active">
       <th scope="row">{{ item.id }}</th>
       <td>{{ item.type }}</td>
-      <td><a href="{{ path('genre_delete', {'id':item.id}) }}">Supprimer</a></p></td>
+      <td><a href="{{ path('genre_delete', {'id':item.id}) }}"><button type="button" class="btn btn-primary">Supprimer</button></a></p></td>
     </tr>
 	{% endfor %}
   </tbody>
