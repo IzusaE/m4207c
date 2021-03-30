@@ -18,8 +18,12 @@ class Document
     private $id;
 
     /**
+<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Genre::class)
      * @ORM\JoinColumn(nullable=false)
+=======
+     * @ORM\Column(type="integer")
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
     private $type_id_id;
 
@@ -43,12 +47,20 @@ class Document
         return $this->id;
     }
 
+<<<<<<< HEAD
     public function getTypeIdId(): ?Genre
+=======
+    public function getTypeIdId(): ?int
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
     {
         return $this->type_id_id;
     }
 
+<<<<<<< HEAD
     public function setTypeIdId(?Genre $type_id_id): self
+=======
+    public function setTypeIdId(int $type_id_id): self
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
     {
         $this->type_id_id = $type_id_id;
 

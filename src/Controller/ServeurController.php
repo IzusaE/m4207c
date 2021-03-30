@@ -7,11 +7,15 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Utilisateur;
 use App\Entity\Access;
 use App\Entity\Autorisation;
 use App\Entity\Document;
+=======
+use App\Entity\User;
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
 use App\Entity\Genre;
 
 
@@ -27,6 +31,16 @@ class ServeurController extends AbstractController
 
         $sess = $request->getSession();
         return $this->render('serveur/index.html.twig', [
+            'controller_name' => 'ServeurController',
+        ]);
+    }
+
+    /**
+     * @Route("/coco", name="coco")
+     */
+    public function coco()
+    {
+        return $this->render('serveur/coco.html.twig', [
             'controller_name' => 'ServeurController',
         ]);
     }
@@ -275,12 +289,62 @@ class ServeurController extends AbstractController
             'controller_name' => 'ServeurController',
         ]);
     }
+    
+    /**
+    * @Route("/registerGenre", name="registerGenre")
+    */
+    public function registerGenre(EntityManagerInterface $manager, Request $request)
+    {
+        return $this->render('serveur/registerGenre.html.twig', [
+            'controller_name' => 'ServeurController',
+        ]);
+    }
+    
+    /**
+    * @Route("/listeUser", name="listeUser")
+    */
+    public function listeUser(EntityManagerInterface $manager, Request $request)
+    {
+        $listeUser = $manager->getRepository(User::class)->findAll();
+        return $this->render('serveur/listeUser.html.twig', [
+            'controller_name' => 'ServeurController',
+            'listeUser' => $listeUser
+        ]);
+    }
+    
+    /**
+    * @Route("/listGenre", name="listGenre")
+    */
+    public function listGenre(EntityManagerInterface $manager, Request $request)
+    {
+        $listeGenre = $manager->getRepository(Genre::class)->findAll();
+        return $this->render('serveur/listGenre.html.twig', [
+            'controller_name' => 'ServeurController',
+            'listeGenre' => $listeGenre
+        ]);
+    }
+
+    
+    /**
+    * @Route("/delete/{id}", name="genre_delete")
+    *
+    * @return Response
+    */
+    public function deleteGenre(EntityManagerInterface $manager, Request $request, Genre $genre)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($genre);
+        $em->flush();
+
+        return $this->redirectToRoute('listGenre');    
+    }
 
     /**
      * @Route("/registerFile", name="registerFile")
      */
     public function registerFile(Request $request, EntityManagerInterface $manager): Response
     {
+<<<<<<< HEAD
         $sess = $request->getSession();
         if($sess->get("idUtilisateur")){
         //création d'un nouveau document
@@ -425,5 +489,60 @@ class ServeurController extends AbstractController
                 return $this->redirectToRoute('serveur');
             }
 		}
+=======
+		//Récupération des valeurs du formulaire
+        $recupNom = $request->request->get("nom");
+        $recupPrenom = $request->request->get("prenom");
+        $recupEmail = $request->request->get("email");
+        $recupPassword = $request->request->get("password");
+        //création d'un nouvel objet
+		$user = new User();
+		//insertion de la valeur dans l'objet
+		$user->setName($recupNom);
+		$user->setPrenom($recupPrenom);
+		$user->setEmail($recupEmail);
+		$user->setPassword($recupPassword);
+		//Validation en BD
+		$manager->persist($user);
+		$manager->flush();
+		return $this->redirectToRoute('listeUser');
 	}
+
+	/**
+     * @Route("/createGenre", name="createGenre")
+     */
+    public function createGenre(EntityManagerInterface $manager, Request $request)
+    {
+		//Récupération des valeurs du formulaire
+        $recupType = $request->request->get("type");
+        //création d'un nouvel objet
+		$genre = new Genre();
+		//insertion de la valeur dans l'objet
+		$genre->setType($recupType);
+		//Validation en BD
+		$manager->persist($genre);
+		$manager->flush();
+		return $this->redirectToRoute('listGenre');
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+	}
+
+    /**
+     * @Route("/loginUser", name="login_user")
+     */
+    public function loginUser(EntityManagerInterface $manager, Request $request)
+    {
+        $AllUsers = $manager->getRepository(User::class)->findAll();
+		$recupNom = $request->request->get("nom");
+        $recupPassword = $request->request->get("password");
+        $user1 = $manager->getRepository(User::class)->
+        findBy( 
+            array ('prenom' => $recupNom, 'password' => $recupPassword) 
+        );
+        if ($user1 != NULL) {
+            return $this->redirectToRoute('coco');
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+	}
+    
 }

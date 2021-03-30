@@ -52,6 +52,21 @@ class Utilisateur
      */
     private $password;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $code;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $salt;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $groupe_id_id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +152,42 @@ class Utilisateur
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
+    public function getSalt(): ?string
+    {
+        return $this->salt;
+    }
+
+    public function setSalt(string $salt): self
+    {
+        $this->salt = $salt;
+
+        return $this;
+    }
+
+    public function getGroupeIdId(): ?int
+    {
+        return $this->groupe_id_id;
+    }
+
+    public function setGroupeIdId(int $groupe_id_id): self
+    {
+        $this->groupe_id_id = $groupe_id_id;
 
         return $this;
     }

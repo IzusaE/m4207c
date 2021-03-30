@@ -18,20 +18,32 @@ class Access
     private $id;
 
     /**
+<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Utilisateur::class)
      * @ORM\JoinColumn(nullable=false)
+=======
+     * @ORM\Column(type="integer")
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
     private $utilisateur_id_id;
 
     /**
+<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Autorisation::class)
      * @ORM\JoinColumn(nullable=false)
+=======
+     * @ORM\Column(type="integer")
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
     private $autorisation_id_id;
 
     /**
+<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Document::class)
      * @ORM\JoinColumn(nullable=false)
+=======
+     * @ORM\Column(type="integer")
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
     private $document_id_id;
 
@@ -40,12 +52,20 @@ class Access
         return $this->id;
     }
 
+<<<<<<< HEAD
     public function getUtilisateurIdId(): ?Utilisateur
+=======
+    public function getUtilisateurIdId(): ?User
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
     {
         return $this->utilisateur_id_id;
     }
 
+<<<<<<< HEAD
     public function setUtilisateurIdId(?Utilisateur $utilisateur_id_id): self
+=======
+    public function setUtilisateurIdId(?User $Utilisateur_id_id): self
+>>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
     {
         $this->utilisateur_id_id = $utilisateur_id_id;
 
