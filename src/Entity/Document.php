@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\DocumentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,19 +20,15 @@ class Document
     private $id;
 
     /**
-<<<<<<< HEAD
-     * @ORM\ManyToOne(targetEntity=Genre::class)
-     * @ORM\JoinColumn(nullable=false)
-=======
-     * @ORM\Column(type="integer")
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
-     */
-    private $type_id_id;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
-    private $chemin;
+    private $Chemin;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Genre::class, inversedBy="documents")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $typeId;
 
     /**
      * @ORM\Column(type="datetime")
@@ -42,39 +40,46 @@ class Document
      */
     private $actif;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Genre::class, mappedBy="documents")
+     */
+    private $genres;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $nomDoc;
+
+    public function __construct()
+    {
+        $this->genres = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-<<<<<<< HEAD
-    public function getTypeIdId(): ?Genre
-=======
-    public function getTypeIdId(): ?int
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+    public function getChemin(): ?string
     {
-        return $this->type_id_id;
+        return $this->Chemin;
     }
 
-<<<<<<< HEAD
-    public function setTypeIdId(?Genre $type_id_id): self
-=======
-    public function setTypeIdId(int $type_id_id): self
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+    public function setChemin(string $Chemin): self
     {
-        $this->type_id_id = $type_id_id;
+        $this->Chemin = $Chemin;
 
         return $this;
     }
 
-    public function getChemin(): ?string
+    public function getTypeId(): ?Genre
     {
-        return $this->chemin;
+        return $this->typeId;
     }
 
-    public function setChemin(string $chemin): self
+    public function setTypeId(?Genre $typeId): self
     {
-        $this->chemin = $chemin;
+        $this->typeId = $typeId;
 
         return $this;
     }
@@ -99,6 +104,45 @@ class Document
     public function setActif(int $actif): self
     {
         $this->actif = $actif;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Genre[]
+     */
+    public function getGenres(): Collection
+    {
+        return $this->genres;
+    }
+
+    public function addGenre(Genre $genre): self
+    {
+        if (!$this->genres->contains($genre)) {
+            $this->genres[] = $genre;
+            $genre->addDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGenre(Genre $genre): self
+    {
+        if ($this->genres->removeElement($genre)) {
+            $genre->removeDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function getNomDoc(): ?string
+    {
+        return $this->nomDoc;
+    }
+
+    public function setNomDoc(string $nomDoc): self
+    {
+        $this->nomDoc = $nomDoc;
 
         return $this;
     }

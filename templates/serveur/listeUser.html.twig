@@ -19,27 +19,16 @@
       <th scope="col">Nom</th>
       <th scope="col">Prénom</th>
 	   <th scope="col">email</th>     
-<<<<<<< HEAD
-	   <th scope="col">Suppression</th>     
-=======
-	   <th scope="col">Password</th>     
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+	   <th scope="col">Suppression</th>  
     </tr>
   </thead>
   <tbody>
 	{% for item in listeUser %}
     <tr class="table-active">
-<<<<<<< HEAD
       <th scope="row">{{ item.nom }}</th>
       <td>{{ item.prenom }}</td>
       <td>{{ item.email }}</td>
       <td><a href="{{ path('utilisateur_delete', {'id':item.id}) }}"><button type="button" class="btn btn-primary">Supprimer</button></a></p></td>
-=======
-      <th scope="row">{{ item.name }}</th>
-      <td>{{ item.prenom }}</td>
-      <td>{{ item.email }}</td>
-      <td>{{ item.password }}</td>
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
     </tr>
 	{% endfor %}
   </tbody>

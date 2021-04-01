@@ -7,42 +7,35 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use DateTime;
 use App\Entity\Utilisateur;
 use App\Entity\Access;
 use App\Entity\Autorisation;
 use App\Entity\Document;
-=======
 use App\Entity\User;
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
 use App\Entity\Genre;
 
 
 class ServeurController extends AbstractController
 {
-    // Page d'accueil de mon site
     /**
      * @Route("/serveur", name="serveur")
      */
     public function index(EntityManagerInterface $manager, Request $request)
     {
-        //$user1=$this->utilisateurConnecte($manager, $request, $session);
-
+        // Je viens démarrer ma session
         $sess = $request->getSession();
-        return $this->render('serveur/index.html.twig', [
-            'controller_name' => 'ServeurController',
-        ]);
-    }
-
-    /**
-     * @Route("/coco", name="coco")
-     */
-    public function coco()
-    {
-        return $this->render('serveur/coco.html.twig', [
-            'controller_name' => 'ServeurController',
-        ]);
+        if($sess->get("idUtilisateur")) {
+            return $this->redirectToRoute('confirmationConnection');
+        } else {
+            return $this->render('serveur/index.html.twig', [
+                'controller_name' => 'ServeurController',
+            ]);
+        }
     }
     
     // Ici je vais venir mettre tout ce qui touche à des enregistrements de données
@@ -59,18 +52,19 @@ class ServeurController extends AbstractController
             $recupPrenom = $request->request->get("prenom");
             $recupEmail = $request->request->get("email");
             $recupPassword = $request->request->get("password");
-            //$hashpass = password_hash($recupPassword, PASSWORD_BCRYPT);
+            $recupGroupe = $request->request->get("groupe");
+            $hashpass = password_hash($recupPassword, PASSWORD_DEFAULT);
             //création d'un nouvel objet
             $utilisateur = new utilisateur();
             //insertion de la valeur dans l'objet
             $utilisateur->setNom($recupNom);
             $utilisateur->setPrenom($recupPrenom);
             $utilisateur->setEmail($recupEmail);
-            //$utilisateur->setPassword($hashpass);
-            $utilisateur->setPassword($recupPassword);
+            $utilisateur->setPassword($hashpass);
+            //$utilisateur->setPassword($recupPassword);
             $utilisateur->setCode('a');
             $utilisateur->setSalt('a');
-            $utilisateur->setGroupeIdId('1');
+            $utilisateur->setGroupeIdId($recupGroupe);
             //Validation en BD
             $manager->persist($utilisateur);
             $manager->flush();
@@ -97,58 +91,34 @@ class ServeurController extends AbstractController
 		return $this->redirectToRoute('listeGenre');
 	}
 
-    // Ici je vais venir mettre tout ce qui touche à des listes de données
 
-       /**
-    * @Route("/listeGenre", name="listeGenre")
-    */
-    public function listeGenre(EntityManagerInterface $manager, Request $request)
-    {
-        $listeGenre = $manager->getRepository(Genre::class)->findAll();
-        return $this->render('serveur/listeGenre.html.twig', [
-            'controller_name' => 'ServeurController',
-            'listeGenre' => $listeGenre
-        ]);
-    }
 
     /**
-    * @Route("/listeUser", name="listeUser")
-    */
-    public function listeUser(EntityManagerInterface $manager, Request $request, SessionInterface $session)
-    {
-        $sess = $request->getSession();
-        if($sess->get("groupeUtilisateur") == 2) {
-            $listeUser = $manager->getRepository(Utilisateur::class)->findAll();
-            return $this->render('serveur/listeUser.html.twig', [
-                'controller_name' => 'ServeurController',
-                'listeUser' => $listeUser
-            ]);
-        } else {
-            return $this->redirectToRoute('serveur');
-        }
-        //}
-        //else
-        //    return new Response ("Page réservé aux administrateurs");
-    }
-
-    /**
-     * @Route("/listeFiles", name="listeFiles")
+     * @Route("/registerFile", name="registerFile")
      */
-	public function listeFiles(Request $request, EntityManagerInterface $manager): Response
+    public function registerFile(Request $request, EntityManagerInterface $manager): Response
     {
         $sess = $request->getSession();
         if($sess->get("idUtilisateur")){
-        //Requête qui récupère la liste des Users
-        $listeFiles = $manager->getRepository(Access::class)->findBy(array('utilisateur_id_id' => ($sess->get("idUtilisateur"))));
+            $chemin = '/var/www/html/symfony/m4207c/public';
+            $nom = $_FILES['fichier']['name'];
+            $nomtmp = $_FILES['fichier']['tmp_name'];
+            $dest = $chemin.'//'.basename($_FILES['fichier']['name']);
+            $resultat= move_uploaded_file($_FILES['fichier']['tmp_name'],$dest);
 
-        return $this->render('serveur/listeFiles.html.twig', [
-            'controller_name' => "Liste des Documents",
-            'listeFiles' => $listeFiles,
-            'listeUsers' => $manager->getRepository(Utilisateur::class)->findAll(),
-            'listeAutorisations' => $manager->getRepository(Autorisation::class)->findAll(),
-            ]);
-        }else{
-        return $this->redirectToRoute('authentification');
+            $Document = new Document();
+            //$MyTpeIpd = $manager->getRepository(Genre::class)->findByDocumentId($id);
+            $Document->setTypeId($manager->getRepository(Genre::class)->findOneById($_POST['genre']));
+            $Document->setChemin($dest);
+            $Document->setNomDoc($request->request->get("nom"));
+            $date = new \DateTime('NOW');
+            $Document->setDate($date);
+            $Document->setActif(1);
+            $manager->persist($Document);
+            $manager->flush();
+            return $this->redirectToRoute('listeFiles');
+        } else {
+            return $this->redirectToRoute('serveur');
         }
     }
 
@@ -160,11 +130,16 @@ class ServeurController extends AbstractController
     */
     public function deleteGenre(EntityManagerInterface $manager, Request $request, Genre $genre)
     {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($genre);
-        $em->flush();
+        $sess = $request->getSession();
+        if($sess->get("idUtilisateur")){
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($genre);
+            $em->flush();
 
-        return $this->redirectToRoute('listeGenre');    
+            return $this->redirectToRoute('listeGenre');    
+        } else {
+            return $this->redirectToRoute('serveur');   
+        } 
     }
 
     /**
@@ -213,17 +188,27 @@ class ServeurController extends AbstractController
     /**
      * @Route("/loginUser", name="login_user")
      */
-    public function loginUser(EntityManagerInterface $manager, Request $request, SessionInterface $session)
+    public function loginUser(EntityManagerInterface $manager, Request $request, SessionInterface $sess)
     {
         $AllUsers = $manager->getRepository(Utilisateur::class)->findAll();
 		$recupNom = $request->request->get("nom");
         $recupPassword = $request->request->get("password");
-        $monNom = $recupNom;
-        $user1 = $manager->getRepository(Utilisateur::class)->
+        $user1 = $manager->getRepository(Utilisateur::class)->findOneBy(array('nom' => $recupNom));
+        $recupPassUse = $user1->getPassword();
+        $Verification = password_verify($recupPassword, $recupPassUse);
+        /*$user1 = $manager->getRepository(Utilisateur::class)->
         findBy( 
             array ('nom' => $recupNom, 'password' => $recupPassword) 
-        );
+        );*/
         //$userId=$session->get('userId');
+        if ($Verification == TRUE) {
+            $sess->set('idUtilisateur', $user1->getId());
+            $sess->set('nomUtilisateur', $user1->getNom());
+            $sess->set('groupeUtilisateur', $user1->getGroupeIdId());
+            $sess->set('prenomUtilisateur', $user1->getPrenom());
+            return $this->redirectToRoute('confirmationConnection');
+        }
+        /*
         if ($user1 != NULL) {
             $utilisateur = new Utilisateur;
             $utilisateur = $user1[0];
@@ -233,24 +218,12 @@ class ServeurController extends AbstractController
             $sess->set('groupeUtilisateur', $utilisateur->getGroupeIdId());
             $sess->set('prenomUtilisateur', $utilisateur->getPrenom());
             return $this->redirectToRoute('confirmationConnection');
-        } else {
+        }*/ else {
             return $this->redirectToRoute('serveur');
         }
         dd($recupNom, $recupPassword, $reponse);
         return new response(1);
 	}
-
-    // Ici je vais venir mettre toutes mes pages autres
-
-    /**
-     * @Route("/confirmationConnection", name="confirmationConnection")
-     */
-    public function confirmationConnection()
-    {
-        return $this->render('serveur/confirmationConnection.html.twig', [
-            'controller_name' => 'ServeurController',
-        ]);
-    }
     
     /**
      * @Route("/logout", name="logout")
@@ -265,16 +238,34 @@ class ServeurController extends AbstractController
         return $this->redirectToRoute('serveur');
     }
 
+    // Ici je vais venir mettre toutes mes pages autres
+
+    /**
+     * @Route("/confirmationConnection", name="confirmationConnection")
+     */
+    public function confirmationConnection(Request $request, EntityManagerInterface $manager)
+    {
+        // Page pour la réussite de la connexion
+        $sess = $request->getSession();
+        $myname = $sess->get("nomUtilisateur");
+        return $this->render('serveur/confirmationConnection.html.twig', [
+            'controller_name' => 'ServeurController',
+            'nomSession' => $myname
+        ]);
+    }
+
     /**
     * @Route("/register", name="register")
     */
     public function register(EntityManagerInterface $manager, Request $request)
     {
         $sess = $request->getSession();
-        if($sess->get("idUtilisateur")){
+        if($sess->get("groupeUtilisateur") == 2) {
             return $this->render('serveur/register.html.twig', [
                 'controller_name' => 'New User',
             ]);
+        } else if ($sess->get("idUtilisateur")) {
+            return $this->redirectToRoute('errorSess');
         } else {
             return $this->redirectToRoute('serveur');
         }
@@ -285,116 +276,15 @@ class ServeurController extends AbstractController
     */
     public function registerGenre(EntityManagerInterface $manager, Request $request)
     {
-        return $this->render('serveur/registerGenre.html.twig', [
-            'controller_name' => 'ServeurController',
-        ]);
-    }
-    
-    /**
-    * @Route("/registerGenre", name="registerGenre")
-    */
-    public function registerGenre(EntityManagerInterface $manager, Request $request)
-    {
-        return $this->render('serveur/registerGenre.html.twig', [
-            'controller_name' => 'ServeurController',
-        ]);
-    }
-    
-    /**
-    * @Route("/listeUser", name="listeUser")
-    */
-    public function listeUser(EntityManagerInterface $manager, Request $request)
-    {
-        $listeUser = $manager->getRepository(User::class)->findAll();
-        return $this->render('serveur/listeUser.html.twig', [
-            'controller_name' => 'ServeurController',
-            'listeUser' => $listeUser
-        ]);
-    }
-    
-    /**
-    * @Route("/listGenre", name="listGenre")
-    */
-    public function listGenre(EntityManagerInterface $manager, Request $request)
-    {
-        $listeGenre = $manager->getRepository(Genre::class)->findAll();
-        return $this->render('serveur/listGenre.html.twig', [
-            'controller_name' => 'ServeurController',
-            'listeGenre' => $listeGenre
-        ]);
-    }
-
-    
-    /**
-    * @Route("/delete/{id}", name="genre_delete")
-    *
-    * @return Response
-    */
-    public function deleteGenre(EntityManagerInterface $manager, Request $request, Genre $genre)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($genre);
-        $em->flush();
-
-        return $this->redirectToRoute('listGenre');    
-    }
-
-    /**
-     * @Route("/registerFile", name="registerFile")
-     */
-    public function registerFile(Request $request, EntityManagerInterface $manager): Response
-    {
-<<<<<<< HEAD
         $sess = $request->getSession();
-        if($sess->get("idUtilisateur")){
-        //création d'un nouveau document
-        $Document = new Document();
-        //Récupération et transfert du fichier
-        //dd($request->request->get('choix'));
-        $brochureFile = $request->files->get("fichier");
-        if ($brochureFile){
-        $newFilename = uniqid('', true) . "." . $brochureFile->getClientOriginalExtension();
-        $brochureFile->move($this->getParameter('upload'), $newFilename);
-        //insertion du document dans la base.
-        if($request->request->get('choix') == "on"){
-        $actif=1;
-        }else{
-        $actif=2;
-        }
-        $Document->setActif($actif);
-        $Document->setNom($request->request->get('nom'));
-        $Document->setTypeId($manager->getRepository(Genre::class)->findOneById($request->request->get('genre')));
-        $Document->setCreatedAt(new \Datetime);
-        $Document->setChemin($newFilename);
-
-        $manager->persist($Document);
-        $manager->flush();
-        }
-        //Création d'un access pour la personne avec laquelle on veut partager le document
-        if($request->request->get('utilisateur') != -1){
-        $user = $manager->getRepository(Utilisateur::class)->findOneById($request->request->get('utilisateur'));
-        $autorisation = $manager->getRepository(Autorisation::class)->findOneById($request->request->get('autorisation'));
-        $access = new Access();
-        $access->setUtilisateurIdId($user);
-        $access->setAutorisationId($autorisation);
-        $access->setDocumentId($Document);
-        $manager->persist($access);
-        $manager->flush();
-        }
-        //Création d'un accès pour l'uploadeur (propriétaire)
-        $user = $manager->getRepository(Utilisateur::class)->findOneById($sess->get("idUtilisateur"));
-        $autorisation = $manager->getRepository(Autorisation::class)->findOneById(1);
-        $access = new Access();
-        $access->setUtilisateurIdId($user);
-        $access->setAutorisationId($autorisation);
-        $access->setDocumentId($Document);
-        $manager->persist($access);
-        $manager->flush();
-
-
-        return $this->redirectToRoute('listeFiles');
-        }else{
-        return $this->redirectToRoute('serveur');
+        if($sess->get("groupeUtilisateur") == 2) {
+            return $this->render('serveur/registerGenre.html.twig', [
+                'controller_name' => 'ServeurController',
+            ]);
+        } else if ($sess->get("idUtilisateur")) {
+            return $this->redirectToRoute('errorSess');
+        } else {
+            return $this->redirectToRoute('serveur');
         }
     }
 
@@ -403,39 +293,134 @@ class ServeurController extends AbstractController
      */
     public function newFile(Request $request, EntityManagerInterface $manager): Response
     {
-        //Requête pour récupérer toute la table genre
-        $listeGenre = $manager->getRepository(Genre::class)->findAll();
-        return $this->render('serveur/newFile.html.twig', [
-        'controller_name' => "Upload d'un Document",
-        'listeGenre' => $listeGenre,
-        'listeUsers' => $manager->getRepository(Utilisateur::class)->findAll(),
-        'listeAutorisation' => $manager->getRepository(Autorisation::class)->findAll(),
+        $sess = $request->getSession();
+        if($sess->get("idUtilisateur")){
+            //Requête pour récupérer toute la table genre
+            $listeGenre = $manager->getRepository(Genre::class)->findAll();
+            $listeUtilisateurs = $manager->getRepository(Utilisateur::class)->findAll();
+            $listeAutorisations = $manager->getRepository(Autorisation::class)->findAll();
+            return $this->render('serveur/newFile.html.twig', [
+            'controller_name' => "Upload d'un Document",
+            'listeGenre' => $listeGenre,
+            'listeUsers' => $listeUtilisateurs,
+            'listeAutorisation' => $listeAutorisations
+            ]);
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+    }
+
+    /**
+    * @Route("/listeUser", name="listeUser")
+    */
+    public function listeUser(EntityManagerInterface $manager, Request $request, SessionInterface $session)
+    {
+        $sess = $request->getSession();
+        if($sess->get("groupeUtilisateur") == 2) {
+            $listeUser = $manager->getRepository(Utilisateur::class)->findAll();
+            return $this->render('serveur/listeUser.html.twig', [
+                'controller_name' => 'ServeurController',
+                'listeUser' => $listeUser
+            ]);
+        } else if ($sess->get("idUtilisateur")) {
+            return $this->redirectToRoute('errorSess');
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+        //}
+        //else
+        //    return new Response ("Page réservé aux administrateurs");
+    }
+    
+    /**
+    * @Route("/listeGenre", name="listeGenre")
+    */
+    public function listeGenre(EntityManagerInterface $manager, Request $request)
+    {
+        $sess = $request->getSession();
+        if($sess->get("groupeUtilisateur") == 2) {
+            $listeGenre = $manager->getRepository(Genre::class)->findAll();
+            return $this->render('serveur/listeGenre.html.twig', [
+                'controller_name' => 'ServeurController',
+                'listeGenre' => $listeGenre
+            ]);
+        } else if ($sess->get("idUtilisateur")) {
+            return $this->redirectToRoute('errorSess');
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+    }
+
+
+    /**
+     * @Route("/listeFiles", name="listeFiles")
+     */
+	public function listeFiles(Request $request, EntityManagerInterface $manager): Response
+    {
+        $sess = $request->getSession();
+        if($sess->get("idUtilisateur")){
+            //Requête qui récupère la liste des Users
+            /*$listeFiles = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
+
+            return $this->render('serveur/listeFiles.html.twig', [
+                'controller_name' => "Liste des Documents",
+                'listeFiles' => $listeFiles,
+                'listeUsers' => $manager->getRepository(Utilisateur::class)->findAll(),
+                'listeAutorisations' => $manager->getRepository(Autorisation::class)->findAll(),
+                ]);*/
+                $listFichier=$manager->getRepository(Document::class)->findAll();
+
+                return $this->render('serveur/listeFiles.html.twig', [
+                    'listFichier' => $listFichier
+                ]);
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+    }
+
+    /**
+     * @Route ("/permission", name="permission")
+     */
+    public function permission(Request $request, EntityManagerInterface $manager, Document $id): Response
+    {
+		$sess = $request->getSession();
+		if($sess->get("idUtilisateur")){
+			//Récupération des listes
+			$listeDocument = $manager->getRepository(Document::class)->findAll();
+			$listeUser = $manager->getRepository(Utilisateur::class)->findAll();
+			return $this->render('ged/permission.html.twig', [
+            'controller_name' => "Attribution d'une permission",
+            'listeDocument' => $listeDocument,
+            'listeUser' => $listeUser,
         ]);
+		}else{
+			return $this->redirectToRoute('serveur');	
+		}
     }
 
     /**
      * @Route("partageFile", name="partageFile")
      */
-    public function partageFile(Request $request, EntityManagerInterface $manager): Response
+    /*public function partageFile(Request $request, EntityManagerInterface $manager): Response
     {
-    $sess = $request->getSession();
-    if($sess->get("idUtilisateur")){
-        //Requête le user en focntion du formulaire
-        $user = $manager->getRepository(Utilisateur::class)->findOneById($request->request->get('utilisateur'));
-        $autorisation = $manager->getRepository(Autorisation::class)->findOneById($request->request->get('autorisation'));
-        $document = $manager->getRepository(Document::class)->findOneById($request->request->get('doc'));
-        $access = new Access();
-        $access->setUtilisateurIdId($user);
-        $access->setAutorisationId($autorisation);
-        $access->setDocumentId($document);
-        $manager->persist($access);
-        $manager->flush();
+        $sess = $request->getSession();
+        if($sess->get("idUtilisateur")){
+            //Requête le user en focntion du formulaire
+            $user = $manager->getRepository(Utilisateur::class)->findOneById($request->request->get('utilisateur'));
+            $autorisation = $manager->getRepository(Autorisation::class)->findOneById($request->request->get('autorisation'));
+            $document = $manager->getRepository(Document::class)->findOneById($request->request->get('doc'));
+            $access = new Access();
+            $access->setUtilisateurIdId($user);
+            $access->setAutorisationId($autorisation);
+            $access->setDocumentId($document);
+            $manager->persist($access);
+            $manager->flush();
 
-        return $this->redirectToRoute('listeFiles');
-    }else{
-    return $this->redirectToRoute('serveur');
-    }
-    }
+            return $this->redirectToRoute('listeFiles');
+        } else {
+            return $this->redirectToRoute('serveur');
+        }
+    }*/
 
     /**
      * @Route("/dashboard", name="dashboard")
@@ -447,7 +432,7 @@ class ServeurController extends AbstractController
             if($sess->get("idUtilisateur")){
                 //*******************Requetes Mysql*******************
                 //Récupération du nombre de document
-                $listeDocuments = $manager->getRepository(Access::class)->findBy(array('utilisateur_id_id' => ($sess->get("idUtilisateur"))));
+                $listeDocuments = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
                 $listeDocumentAll = $manager->getRepository(Access::class)->findAll(); 
                 $listeUsers = $manager->getRepository(Utilisateur::class)->findAll();
                 $listeAutorisations = $manager->getRepository(Autorisation::class)->findAll();
@@ -489,7 +474,7 @@ class ServeurController extends AbstractController
                 return $this->redirectToRoute('serveur');
             }
 		}
-=======
+
 		//Récupération des valeurs du formulaire
         $recupNom = $request->request->get("nom");
         $recupPrenom = $request->request->get("prenom");
@@ -508,41 +493,14 @@ class ServeurController extends AbstractController
 		return $this->redirectToRoute('listeUser');
 	}
 
-	/**
-     * @Route("/createGenre", name="createGenre")
-     */
-    public function createGenre(EntityManagerInterface $manager, Request $request)
-    {
-		//Récupération des valeurs du formulaire
-        $recupType = $request->request->get("type");
-        //création d'un nouvel objet
-		$genre = new Genre();
-		//insertion de la valeur dans l'objet
-		$genre->setType($recupType);
-		//Validation en BD
-		$manager->persist($genre);
-		$manager->flush();
-		return $this->redirectToRoute('listGenre');
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
-	}
-
     /**
-     * @Route("/loginUser", name="login_user")
-     */
-    public function loginUser(EntityManagerInterface $manager, Request $request)
+    * @Route("/errorSess", name="errorSess")
+    */
+    public function errorSess(EntityManagerInterface $manager, Request $request)
     {
-        $AllUsers = $manager->getRepository(User::class)->findAll();
-		$recupNom = $request->request->get("nom");
-        $recupPassword = $request->request->get("password");
-        $user1 = $manager->getRepository(User::class)->
-        findBy( 
-            array ('prenom' => $recupNom, 'password' => $recupPassword) 
-        );
-        if ($user1 != NULL) {
-            return $this->redirectToRoute('coco');
-        } else {
-            return $this->redirectToRoute('serveur');
-        }
-	}
+        return $this->render('serveur/errorSess.html.twig', [
+            'controller_name' => 'New User',
+        ]);
+    }
     
 }

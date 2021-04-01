@@ -12,9 +12,9 @@
         <div class="form-group row">
             <label for="staticNom" class="col-sm-2 col-form-label">Genre</label>
             <div class="col-sm-10">
-                <select class="form-group" name="genre">
+                <select class="form-group" name="genre" id="genre">
                     {% for item in listeGenre %}
-                        <option class="form-group" value= {{ item.id }}>{{ item.type }}</option>
+                        <option class="form-group" value="{{ item.id }}" >{{ item.type }}</option>
                     {% endfor %}
                 </select>
             </div>

@@ -18,80 +18,63 @@ class Access
     private $id;
 
     /**
-<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Utilisateur::class)
      * @ORM\JoinColumn(nullable=false)
-=======
      * @ORM\Column(type="integer")
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
-    private $utilisateur_id_id;
+    private $utilisateurId;
 
     /**
-<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Autorisation::class)
      * @ORM\JoinColumn(nullable=false)
-=======
      * @ORM\Column(type="integer")
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
-    private $autorisation_id_id;
+    private $autorisationId;
 
     /**
-<<<<<<< HEAD
      * @ORM\ManyToOne(targetEntity=Document::class)
      * @ORM\JoinColumn(nullable=false)
-=======
      * @ORM\Column(type="integer")
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
      */
-    private $document_id_id;
+    private $documentId;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-<<<<<<< HEAD
-    public function getUtilisateurIdId(): ?Utilisateur
-=======
-    public function getUtilisateurIdId(): ?User
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+    public function getUtilisateurId(): ?Utilisateur
     {
-        return $this->utilisateur_id_id;
+        return $this->utilisateurId;
     }
 
-<<<<<<< HEAD
-    public function setUtilisateurIdId(?Utilisateur $utilisateur_id_id): self
-=======
-    public function setUtilisateurIdId(?User $Utilisateur_id_id): self
->>>>>>> 2b7330020022ea2defc1d5ad64398e0f20e8c6cf
+    public function setUtilisateurId(?Utilisateur $utilisateurId): self
     {
-        $this->utilisateur_id_id = $utilisateur_id_id;
+        $this->utilisateurId = $utilisateurId;
 
         return $this;
     }
 
-    public function getAutorisationIdId(): ?Autorisation
+    public function getAutorisationId(): ?Autorisation
     {
-        return $this->autorisation_id_id;
+        return $this->autorisationId;
     }
 
-    public function setAutorisationIdId(?Autorisation $autorisation_id_id): self
+    public function setAutorisationId(?Autorisation $autorisationId): self
     {
-        $this->autorisation_id_id = $autorisation_id_id;
+        $this->autorisationId = $autorisationId;
 
         return $this;
     }
 
-    public function getDocumentIdId(): ?Document
+    public function getDocumentId(): ?Document
     {
-        return $this->document_id_id;
+        return $this->documentId;
     }
 
-    public function setDocumentIdId(?Document $document_id_id): self
+    public function setDocumentId(?Document $documentId): self
     {
-        $this->document_id_id = $document_id_id;
+        $this->documentId = $documentId;
 
         return $this;
     }
