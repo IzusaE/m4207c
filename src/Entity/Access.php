@@ -20,21 +20,18 @@ class Access
     /**
      * @ORM\ManyToOne(targetEntity=Utilisateur::class)
      * @ORM\JoinColumn(nullable=false)
-     * @ORM\Column(type="integer")
      */
     private $utilisateurId;
 
     /**
      * @ORM\ManyToOne(targetEntity=Autorisation::class)
      * @ORM\JoinColumn(nullable=false)
-     * @ORM\Column(type="integer")
      */
     private $autorisationId;
 
     /**
      * @ORM\ManyToOne(targetEntity=Document::class)
      * @ORM\JoinColumn(nullable=false)
-     * @ORM\Column(type="integer")
      */
     private $documentId;
 

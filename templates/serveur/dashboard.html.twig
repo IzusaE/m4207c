@@ -3,6 +3,7 @@
 {% block title %}Hello AuthentificationController!{% endblock %}
 
 {% block body %}
+<center>
 <h1>{{ controller_name }}</h1>
 <h4>
 	<b>Numéro du contrat : </b>{{ app.session.get('idUtilisateur') }} <br>
@@ -28,6 +29,79 @@
   </div>
   <div class="tab-pane fade" id="partage">
     <p>Liste des documents en partage</p>
+	
+	<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Nom</th>
+      <th scope="col">Genre</th>
+      <th scope="col">Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in listeFiles %}
+      <!-- création de chaque modal -->
+      <div class="modal" id="exampleModal{{item.documentId.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModal{{item.documentId.id}}" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Partage du document {{ item.documentId.nomDoc }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+          <!-- début du formulaire de la modal -->
+          <form action="/partageGed" method="post">
+            <fieldset>
+              <legend>Formulaire d'upload</legend>
+              <div class="form-group row">
+                <label for="staticNom" class="col-sm-4 col-form-label">Information</label>
+                <input class="form-group" type="text" placeholder="{{ item.documentId.nomDoc }}" name="doc" value="{{ item.documentId.id }}" readonly>
+              </div>
+              <div class="form-group row">
+                <label for="staticNom" class="col-sm-4 col-form-label">Utilisateur</label>
+                <div class="col-sm-8">
+                  <select class="form-group" name="utilisateur">
+                    <option class="form-group" value="-1"></option>
+                    {% for item in listeUsers %}
+                      <option class="form-group" value= {{ item.id }}>
+                        {{ item.nom }} {{ item.prenom }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- fin du formulaire de la modal -->
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Upload</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </form>
+      </div>
+      </div>
+      </div>
+      <!-- fin de chaque modal -->
+      <tr class="table">
+        <th scope="row">{{ item.documentId.id }}</th>
+        <td>{{ item.documentId.nomDoc }}</td>
+        <td>{{ item.documentId.typeId.type }}</td>
+        <td>
+          <a href="/upload/{{ item.documentId.chemin }}"><button type="button" class="btn btn-primary">Download</button></a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
   </div>
    <div class="tab-pane fade" id="prive">
     <p>nombre de documents privés : {{ nbDocumentPrives }} </p>
@@ -37,7 +111,8 @@
 	  <th scope="col">Id</th>
       <th scope="col">Nom</th>
       <th scope="col">Genre</th>
-      <th scope="col">Actions</th>
+      <th scope="col">Download</th>
+      <th scope="col">Autorisation</th>
     </tr>
   </thead>
   <tbody>
@@ -47,7 +122,7 @@
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
 			  <div class="modal-header">
-				<h5 class="modal-title">Partage du document {{ item.documentId.nom }}</h5>
+				<h5 class="modal-title">Partage du document {{ item.documentId.nomDoc }}</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 				  <span aria-hidden="true">&times;</span>
 				</button>
@@ -60,7 +135,7 @@
 							<legend>Formulaire d'upload</legend>
 							<div class="form-group row">
 								  <label for="staticNom" class="col-sm-4 col-form-label">Information</label>
-								<input class="form-group" type="text" placeholder="{{ item.documentId.nom }}" name="doc" value="{{ item.documentId.id }}" readonly>
+								<input class="form-group" type="text" placeholder="{{ item.documentId.nomDoc }}" name="doc" value="{{ item.documentId.id }}" readonly>
 							</div>
 							<div class="form-group row">
 								  <label for="staticNom" class="col-sm-4 col-form-label">Utilisateur</label>
@@ -110,12 +185,14 @@
 	<!-- fin de chaque modal -->
     <tr class="table">
       <th scope="row">{{ item.documentId.id }}</th>
-      <td>{{ item.documentId.nom }}</td>
+      <td>{{ item.documentId.nomDoc }}</td>
       <td>{{ item.documentId.typeId.type }}</td>
       <td>
-		<a href="/upload/{{ item.documentId.chemin }}"><i class="fas fa-file-download"></i></a>
+		<a href="/upload/{{ item.documentId.chemin }}"><button type="button" class="btn btn-primary">Download</button></a>
+	  </td>
+	  <td>
 		{% if item.autorisationId.id == 1 %}
-			<a href="#exampleModal{{ item.documentId.id }}" data-toggle="modal" data-target="#exampleModal{{ item.documentId.id }}"><i class="fas fa-share-square"></i></a>
+			<a href="#exampleModal{{ item.documentId.id }}" data-toggle="modal" data-target="#exampleModal{{ item.documentId.id }}"><button type="button" class="btn btn-primary">Autorisation</button></a>
 		{% endif %}
 	  </td>
     </tr>
@@ -124,5 +201,5 @@
 </table>
   </div>
 </div>
-
+</center>
 {% endblock %}

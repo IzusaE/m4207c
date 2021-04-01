@@ -105,6 +105,11 @@ class ServeurController extends AbstractController
             $nomtmp = $_FILES['fichier']['tmp_name'];
             $dest = $chemin.'//'.basename($_FILES['fichier']['name']);
             $resultat= move_uploaded_file($_FILES['fichier']['tmp_name'],$dest);
+            if($request->request->get('choix') == "on"){
+                $actif=1;
+            } else {
+                $actif=2;
+            }
 
             $Document = new Document();
             //$MyTpeIpd = $manager->getRepository(Genre::class)->findByDocumentId($id);
@@ -113,9 +118,32 @@ class ServeurController extends AbstractController
             $Document->setNomDoc($request->request->get("nom"));
             $date = new \DateTime('NOW');
             $Document->setDate($date);
-            $Document->setActif(1);
+            $Document->setActif($actif);
             $manager->persist($Document);
             $manager->flush();
+
+            if ($request->request->get('utilisateur') != -1) {
+                $user = $manager->getRepository(Utilisateur::class)->findOneById($request->request->get('utilisateur'));
+                //dd($user);
+                $autorisation = $manager->getRepository(Autorisation::Class)->findOneById(1);
+                $access = new Access();
+                $access->setUtilisateurId($user);
+                //dd($access->setUtilisateurId($user));
+                $access->setAutorisationId($autorisation);
+                $access->setDocumentId($Document);
+                $manager->persist($access);
+                $manager->flush();
+            }
+
+            $user = $manager->getRepository(Utilisateur::class)->findOneById($sess->get("idUtilisateur"));
+            $autorisation = $manager->getRepository(Autorisation::class)->findOneById(1);
+            $access = new Access();
+            $access->setUtilisateurId($user);
+            $access->setAutorisationId($autorisation);
+            $access->setDocumentId($Document);
+            $manager->persist($access);
+            $manager->flush();
+
             return $this->redirectToRoute('listeFiles');
         } else {
             return $this->redirectToRoute('serveur');
@@ -195,30 +223,14 @@ class ServeurController extends AbstractController
         $recupPassword = $request->request->get("password");
         $user1 = $manager->getRepository(Utilisateur::class)->findOneBy(array('nom' => $recupNom));
         $recupPassUse = $user1->getPassword();
-        $Verification = password_verify($recupPassword, $recupPassUse);
-        /*$user1 = $manager->getRepository(Utilisateur::class)->
-        findBy( 
-            array ('nom' => $recupNom, 'password' => $recupPassword) 
-        );*/
-        //$userId=$session->get('userId');
+        $Verification = password_verify($recupPassword, $recupPassUse); 
         if ($Verification == TRUE) {
             $sess->set('idUtilisateur', $user1->getId());
             $sess->set('nomUtilisateur', $user1->getNom());
             $sess->set('groupeUtilisateur', $user1->getGroupeIdId());
             $sess->set('prenomUtilisateur', $user1->getPrenom());
             return $this->redirectToRoute('confirmationConnection');
-        }
-        /*
-        if ($user1 != NULL) {
-            $utilisateur = new Utilisateur;
-            $utilisateur = $user1[0];
-            $sess = $request->getSession();
-            $sess->set('idUtilisateur', $utilisateur->getId());
-            $sess->set('nomUtilisateur', $utilisateur->getNom());
-            $sess->set('groupeUtilisateur', $utilisateur->getGroupeIdId());
-            $sess->set('prenomUtilisateur', $utilisateur->getPrenom());
-            return $this->redirectToRoute('confirmationConnection');
-        }*/ else {
+        } else {
             return $this->redirectToRoute('serveur');
         }
         dd($recupNom, $recupPassword, $reponse);
@@ -360,18 +372,13 @@ class ServeurController extends AbstractController
         $sess = $request->getSession();
         if($sess->get("idUtilisateur")){
             //Requête qui récupère la liste des Users
-            /*$listeFiles = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
+            $listeFiles = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
 
             return $this->render('serveur/listeFiles.html.twig', [
                 'controller_name' => "Liste des Documents",
                 'listeFiles' => $listeFiles,
                 'listeUsers' => $manager->getRepository(Utilisateur::class)->findAll(),
                 'listeAutorisations' => $manager->getRepository(Autorisation::class)->findAll(),
-                ]);*/
-                $listFichier=$manager->getRepository(Document::class)->findAll();
-
-                return $this->render('serveur/listeFiles.html.twig', [
-                    'listFichier' => $listFichier
                 ]);
         } else {
             return $this->redirectToRoute('serveur');
@@ -399,9 +406,9 @@ class ServeurController extends AbstractController
     }
 
     /**
-     * @Route("partageFile", name="partageFile")
+     * @Route("partageGed", name="partageGed")
      */
-    /*public function partageFile(Request $request, EntityManagerInterface $manager): Response
+    public function partageGed(Request $request, EntityManagerInterface $manager): Response
     {
         $sess = $request->getSession();
         if($sess->get("idUtilisateur")){
@@ -410,7 +417,7 @@ class ServeurController extends AbstractController
             $autorisation = $manager->getRepository(Autorisation::class)->findOneById($request->request->get('autorisation'));
             $document = $manager->getRepository(Document::class)->findOneById($request->request->get('doc'));
             $access = new Access();
-            $access->setUtilisateurIdId($user);
+            $access->setUtilisateurId($user);
             $access->setAutorisationId($autorisation);
             $access->setDocumentId($document);
             $manager->persist($access);
@@ -420,77 +427,67 @@ class ServeurController extends AbstractController
         } else {
             return $this->redirectToRoute('serveur');
         }
-    }*/
+    }
+
+    public function uploadGed(Request $request, EntityManagerInterface $manager): Response
+    {
+        //Requête pour récupérer toute la table genre
+        $listeGenre = $manager->getRepository(Genre::class)->findAll();
+        return $this->render('ged/uploadGed.html.twig', [
+        'controller_name' => "Upload d'un Document",
+        'listeGenre' => $listeGenre,
+        'listeUsers' => $manager->getRepository(Utilisateur::class)->findAll(),
+        'listeAutorisation' => $manager->getRepository(Autorisation::class)->findAll(),
+        ]);
+    }
 
     /**
      * @Route("/dashboard", name="dashboard")
      */
 	public function dashboard(Request $request, EntityManagerInterface $manager): Response
 	{
-		{
-			$sess = $request->getSession();
-            if($sess->get("idUtilisateur")){
-                //*******************Requetes Mysql*******************
-                //Récupération du nombre de document
-                $listeDocuments = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
-                $listeDocumentAll = $manager->getRepository(Access::class)->findAll(); 
-                $listeUsers = $manager->getRepository(Utilisateur::class)->findAll();
-                $listeAutorisations = $manager->getRepository(Autorisation::class)->findAll();
-                //*********************Variables*********************
-                $flag = 0 ; //indique que le document privé
-                $nbDocument = 0;
-                $nbDocumentPrives = 0;
-                $documentPrives = Array();
-                $lastDocument = new \Datetime("2000-01-01");
-                
-                foreach($listeDocuments as $val){
-                    $nbDocument++;	
-                    $document = $val->getDocumentId()->getId();
-                    if($val->getDocumentId()->getCreatedAt() > $lastDocument){
-                        $lastDocument = $val->getDocumentId()->getCreatedAt();
-                        $documentDate = $val->getDocumentId();
-                        
-                    }
-                    foreach($listeDocumentAll as $val2){
-                        if($val2->getDocumentId()->getId() == $document && $val2->getUtilisateurIdId()->getId() != $sess->get("idUtilisateur") )
-                            $flag++;	
-                    }
-                    if($flag == 0){
-                        $documentPrives[] = $val ;
-                        $nbDocumentPrives ++;
-                    }
-                    $flag =0;
-                }
-                return $this->render('serveur/dash.html.twig',[
-                'controller_name' => "Espace Client",
-                'nb_document' => $nbDocument,
-                'listeDocumentPrives' => $documentPrives,
-                'nbDocumentPrives' => $nbDocumentPrives,
-                'listeUsers' => $listeUsers,
-                'listeAutorisations' => $listeAutorisations,
-                //'documentDate' => $documentDate,
-                ]);
-            }else{
-                return $this->redirectToRoute('serveur');
-            }
+        $sess = $request->getSession();
+        if($sess->get("idUtilisateur")){
+			//*******************Requetes Mysql*******************
+			//Récupération du nombre de document
+			$listeDocuments = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
+            $listeFiles = $manager->getRepository(Access::class)->findByUtilisateurId($sess->get("idUtilisateur"));
+			$listeDocumentAll = $manager->getRepository(Access::class)->findAll(); 
+			$listeUsers = $manager->getRepository(Utilisateur::class)->findAll();
+			$listeAutorisations = $manager->getRepository(Autorisation::class)->findAll();
+			//*********************Variables*********************
+			$flag = 0 ; //indique que le document privé
+			$nbDocument = 0;
+			$nbDocumentPrives = 0;
+			$documentPrives = Array();
+			$lastDocument = new \Datetime("2000-01-01");
+			
+			foreach($listeDocuments as $val){
+				$nbDocument++;	
+				$document = $val->getDocumentId()->getId();
+				foreach($listeDocumentAll as $val2){
+					if($val2->getDocumentId()->getId() == $document && $val2->getUtilisateurId()->getId() != $sess->get("idUtilisateur") )
+						$flag++;	
+				}
+				if($flag == 0){
+					$documentPrives[] = $val ;
+					$nbDocumentPrives ++;
+				}
+				$flag =0;
+			}
+			return $this->render('serveur/dashboard.html.twig',[
+			 'controller_name' => "Espace Client",
+			 'nb_document' => $nbDocument,
+			 'listeDocumentPrives' => $documentPrives,
+			 'nbDocumentPrives' => $nbDocumentPrives,
+			 'listeUsers' => $listeUsers,
+			 'listeAutorisations' => $listeAutorisations,
+                'listeFiles' => $listeFiles,
+			 //'documentDate' => $documentDate,
+			 ]);
+		}else{
+			return $this->redirectToRoute('serveur');
 		}
-
-		//Récupération des valeurs du formulaire
-        $recupNom = $request->request->get("nom");
-        $recupPrenom = $request->request->get("prenom");
-        $recupEmail = $request->request->get("email");
-        $recupPassword = $request->request->get("password");
-        //création d'un nouvel objet
-		$user = new User();
-		//insertion de la valeur dans l'objet
-		$user->setName($recupNom);
-		$user->setPrenom($recupPrenom);
-		$user->setEmail($recupEmail);
-		$user->setPassword($recupPassword);
-		//Validation en BD
-		$manager->persist($user);
-		$manager->flush();
-		return $this->redirectToRoute('listeUser');
 	}
 
     /**
